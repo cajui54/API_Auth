@@ -1,4 +1,4 @@
-- [] Criação de conta
+- [x] Criação de conta
 - [] Login
   - Validar e-mail e senha
   - Gerar tokens
@@ -41,10 +41,9 @@ npx ts-node src/index.ts
   - types of bcrypt.js
     npm i -D @types/bcryptjs
 
-    ## DB
+        ## DB
 
-    - ORM Mongoose
-      npm i mongoose@8.8.3
+        - ORM Mongoose
+          npm i mongoose@8.8.3
 
-  userName: cajui54
-  pwd: ftebepbaT9yS6hLw
+    npm i jsonwebtoken@9.0.2
