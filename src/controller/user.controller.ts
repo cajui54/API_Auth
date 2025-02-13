@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/register/register.model";
 import bcrypt from "bcryptjs";
+import generateToken from "../helpers/tokens";
 
 class UserController {
   req;
@@ -17,20 +18,10 @@ class UserController {
       // criptografar senha with bcrypt
       const hashedPassword = bcrypt.hashSync(password, 10);
       const user = await UserModel.create({ email, password: hashedPassword });
-      // gerar token de autenticação
-      const accessToken = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET as string,
-        { expiresIn: "15m" }
-      );
-      const refreshToken = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_REFRESH_SECRET as string,
-        { expiresIn: "30d" }
-      );
+
       this.res
         .status(201)
-        .json({ email, tokens: { accessToken, refreshToken } });
+        .json({ email, tokens: generateToken(user._id.toString()) });
     } catch (error) {
       this.res.status(500).json({ message: "Internal server error, ", error });
       console.log("Error registering user: ", error);
