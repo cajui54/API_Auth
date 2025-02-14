@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import { UserModel } from "../models/register/register.model";
 import bcrypt from "bcryptjs";
 import generateToken from "../helpers/tokens";
@@ -26,6 +25,25 @@ class UserController {
       this.res.status(500).json({ message: "Internal server error, ", error });
       console.log("Error registering user: ", error);
     }
+  }
+  async login() {
+    const { email, password } = this.req.body;
+    // buscar por e-mail
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      this.res.status(400).json({ message: "User not found" });
+    }
+    // verificar senha
+    const isPasswordValid = await bcrypt.compare(password, user!.password);
+
+    if (!isPasswordValid) {
+      this.res.status(400).json({ message: "Invalid e-mail or password!" });
+    }
+    // gerar token de autenticação;
+    this.res
+      .status(200)
+      .json({ email, tokens: generateToken(user!._id.toString()) });
   }
 }
 

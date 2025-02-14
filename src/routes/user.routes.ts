@@ -1,41 +1,25 @@
 import express from "express";
-import bcrypt from "bcryptjs";
 import UserController from "../controller/user.controller";
 import {
+  authMiddleware,
   checkIfFieldsAreValids,
-  checkJWT_SECRETS,
 } from "../middlewares/register.middlewares";
 import { UserModel } from "../models/register/register.model";
-import generateToken from "../helpers/tokens";
 
 // lib para criptografar senhas
 
 const userRouter = express.Router();
 
-userRouter.post(
-  "/register",
-  checkJWT_SECRETS,
-  checkIfFieldsAreValids,
-  (req, res) => {
-    return new UserController(req, res).register();
-  }
-);
-userRouter.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  // buscar por e-mail
-  const user = await UserModel.findOne({ email });
+userRouter.get("/profile", authMiddleware, async (req, res) => {
+  const user = await UserModel.findById((req as any).userId);
+  res.json(user);
+});
+userRouter.post("/register", checkIfFieldsAreValids, (req, res) => {
+  return new UserController(req, res).register();
+});
 
-  if (!user) {
-    res.status(400).json({ message: "User not found" });
-  }
-  // verificar senha
-  const isPasswordValid = await bcrypt.compare(password, user!.password);
-
-  if (!isPasswordValid) {
-    res.status(400).json({ message: "Invalid e-mail or password!" });
-  }
-  // gerar token de autenticação;
-  res.status(200).json({ email, tokens: generateToken(user!._id.toString()) });
+userRouter.post("/login", checkIfFieldsAreValids, async (req, res) => {
+  return new UserController(req, res).login();
 });
 
 export default userRouter;
